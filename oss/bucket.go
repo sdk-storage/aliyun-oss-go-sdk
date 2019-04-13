@@ -170,7 +170,9 @@ func (bucket Bucket) GetObjectToFile(objectKey, filePath string, options ...Opti
 	if encodeOpt != nil {
 		acceptEncoding = encodeOpt.(string)
 	}
-	if bucket.getConfig().IsEnableCRC && !hasRange && acceptEncoding != "gzip" {
+
+	isProcessSet, _, _ := isOptionSet(options, "x-oss-process")
+	if bucket.getConfig().IsEnableCRC && !hasRange && acceptEncoding != "gzip" && !isProcessSet {
 		result.Response.ClientCRC = result.ClientCRC.Sum64()
 		err = checkCRC(result.Response, "GetObjectToFile")
 		if err != nil {
@@ -204,7 +206,8 @@ func (bucket Bucket) DoGetObject(request *GetObjectRequest, options []Option) (*
 	// CRC
 	var crcCalc hash.Hash64
 	hasRange, _, _ := isOptionSet(options, HTTPHeaderRange)
-	if bucket.getConfig().IsEnableCRC && !hasRange {
+	isProcessSet, _, _ := isOptionSet(options, "x-oss-process")
+	if bucket.getConfig().IsEnableCRC && !hasRange && !isProcessSet {
 		crcCalc = crc64.New(crcTable())
 		result.ServerCRC = resp.ServerCRC
 		result.ClientCRC = crcCalc
@@ -850,7 +853,8 @@ func (bucket Bucket) GetObjectToFileWithURL(signedURL, filePath string, options 
 		acceptEncoding = encodeOpt.(string)
 	}
 
-	if bucket.getConfig().IsEnableCRC && !hasRange && acceptEncoding != "gzip" {
+	isProcessSet, _, _ := isOptionSet(options, "x-oss-process")
+	if bucket.getConfig().IsEnableCRC && !hasRange && acceptEncoding != "gzip" && !isProcessSet {
 		result.Response.ClientCRC = result.ClientCRC.Sum64()
 		err = checkCRC(result.Response, "GetObjectToFileWithURL")
 		if err != nil {
@@ -884,7 +888,8 @@ func (bucket Bucket) DoGetObjectWithURL(signedURL string, options []Option) (*Ge
 	// CRC
 	var crcCalc hash.Hash64
 	hasRange, _, _ := isOptionSet(options, HTTPHeaderRange)
-	if bucket.getConfig().IsEnableCRC && !hasRange {
+	isProcessSet, _, _ := isOptionSet(options, "x-oss-process")
+	if bucket.getConfig().IsEnableCRC && !hasRange && !isProcessSet {
 		crcCalc = crc64.New(crcTable())
 		result.ServerCRC = resp.ServerCRC
 		result.ClientCRC = crcCalc
